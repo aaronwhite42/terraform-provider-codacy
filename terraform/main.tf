@@ -9,8 +9,13 @@ terraform {
   }
 }
 
+provider "codacy" {
+  api_token    = "SET ME!"
+  base_address = "https://app.codacy.com/api/v3"
+}
 
-resource "codacy_resource" "example" {
-  some_value = "This is a test resource"
-  provider   = codacy
+
+resource "codacy_repository" "aw_test_repo" {
+  repository_provider = "gh"
+  full_path           = "aaronwhite42/terraform-provider-codacy"
 }

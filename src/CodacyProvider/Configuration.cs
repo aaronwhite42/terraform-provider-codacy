@@ -1,13 +1,16 @@
 ﻿using System.ComponentModel;
 using MessagePack;
 
+namespace CodacyProvider;
+
 [MessagePackObject]
 public class Configuration
 {
-    // [Key("file_header")]
-    // [Description("Header text to prepend to every file.")]
-    // public string? FileHeader { get; set; }
-    [Key("value")]
-    [Description("A test value for some reason")]
-    public string Value { get; set; }
+    [Key("api_token")]
+    [Description("Codacy API token")]
+    public string? ApiToken { get; set; }
+
+    [Key("base_address")]
+    [Description("Base address of the Codacy endpoint")]
+    public string BaseAddress { get; set; }
 }

@@ -8,7 +8,15 @@ using TerraformPluginDotNet.ResourceProvider;
 await TerraformPluginHost.RunAsync(args, "advocacy.dev/aaron/codacy", (services, registry) =>
 {
     services.AddSingleton<CodacyConfigurator>();
+    // services.AddHttpClient("Codacy", httpClient =>
+    // {
+    //     httpClient.BaseAddress = new Uri("https://app.codacy.com/api/v3");
+    //     services.Get
+    // });
     services.AddTerraformProviderConfigurator<Configuration, CodacyConfigurator>();
-    services.AddSingleton<IResourceProvider<CodacyResource>, CodacyResourceProvider>();
-    registry.RegisterResource<CodacyResource>("codacy_resource");
+
+    services.AddHttpClient<CodacyResourceProvider>();
+
+    services.AddSingleton<IResourceProvider<CodacyRepository>, CodacyResourceProvider>();
+    registry.RegisterResource<CodacyRepository>("codacy_repository");
 });

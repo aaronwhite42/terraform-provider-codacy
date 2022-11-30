@@ -6,7 +6,7 @@ using TerraformPluginDotNet.Serialization;
 
 [SchemaVersion(1)]
 [MessagePackObject]
-public class CodacyResource
+public class CodacyRepository
 {
     [Key("id")]
     [Computed]
@@ -14,11 +14,58 @@ public class CodacyResource
     [MessagePackFormatter(typeof(ComputedStringValueFormatter))]
     public string Id { get; set; }
 
-    [Key("some_value")]
-    [JsonPropertyName("some_value")]
-    [Description("Some value in the resource.")]
+    // [Key("some_value")]
+    // [JsonPropertyName("some_value")]
+    // [Description("Some value in the resource.")]
+    // [Required]
+
+    [Key("repository_provider")]
+    [JsonPropertyName("repository_provider")]
+    [Description("Repository provider")]
     [Required]
-    public string SomeValue { get; set; }
+    public string Provider { get; set; }
+
+    [Key("full_path")]
+    [JsonPropertyName("full_path")]
+    [Description("Repository full path")]
+    [Required]
+    public string FullPath { get; set; }
+
+    // [Key("owner")]
+    // [JsonPropertyName("owner")]
+    // [Description("Repository owner")]
+    // public string Owner { get; set; }
+
+    // [Key("name")]
+    // [JsonPropertyName("name")]
+    // [Description("Repository name")]
+    // public string Name { get; set; }
+
+    // [Key("visibility")]
+    // [JsonPropertyName("visibility")]
+    // [Description("Repository visibility")]
+    // public string Visibility { get; set; }
+
+    // [Key("problems")]
+    // [JsonPropertyName("problems")]
+    // [Description("Collection of any problems encountered")]
+    // public object[] Problems { get; set; }
+    //
+    // [Key("languages")]
+    // [JsonPropertyName("languages")]
+    // [Description("Collection of repository languages")]
+    // public object[] Languages { get; set; }
+
+    // [Key("repository_id")]
+    // [JsonPropertyName("repository_id")]
+    // [Description("Repository Identifier")]
+    // public int RepositoryId { get; set; }
+
+
+    // [Key("remote_identifier")]
+    // [JsonPropertyName("remote_identifier")]
+    // [Description("Repository remote identifier")]
+    // public string RemoteIdentifier { get; set; }
 }
 
 
