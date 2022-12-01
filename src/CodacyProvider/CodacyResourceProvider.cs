@@ -1,39 +1,66 @@
-﻿using System.Net.Http.Headers;
+﻿using CodacyProvider.Api.Client;
 using TerraformPluginDotNet.ResourceProvider;
 
 namespace CodacyProvider;
 
 public class CodacyResourceProvider :  IResourceProvider<CodacyRepository>
 {
-    private readonly CodacyConfigurator _configurator;
-    private readonly HttpClient _httpClient;
+    private readonly CodacyClient _codacyClient;
+    private readonly Configuration? _config;
 
-    public CodacyResourceProvider(CodacyConfigurator configurator, HttpClient httpClient)
+    public CodacyResourceProvider(CodacyConfigurator configurator, CodacyClient codacyClient)
     {
-        _configurator = configurator;
-        _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri(_configurator.Config?.BaseAddress ?? throw new InvalidOperationException());
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("api-token", _configurator.Config.ApiToken);
+        _codacyClient = codacyClient;
+        _config = configurator.Configuration;
     }
 
-    public Task<CodacyRepository> PlanAsync(CodacyRepository? prior, CodacyRepository proposed)
+    public async Task<CodacyRepository> PlanAsync(CodacyRepository? prior, CodacyRepository proposed)
     {
-        var t = _httpClient;
-        return Task.FromResult(proposed);
+        try
+        {
+            Enum.TryParse(_config?.Provider ?? "Gh", out Provider47 provider);//TODO: handle enum parsing safely
+            var response = await _codacyClient.GetRepositoryAsync(provider, proposed.Owner, proposed.Name);
+            return proposed with { Id = response.Data.RepositoryId.ToString() ?? string.Empty };
+        }
+        catch (Exception)
+        {
+            // smother
+        }
+
+        return new CodacyRepository
+        {
+            Name = proposed.Name,
+            Owner = proposed.Owner
+        };
     }
 
     public async Task<CodacyRepository> CreateAsync(CodacyRepository planned)
     {
-        planned.Id = Guid.NewGuid().ToString();
-        // call Codacy API
-        // await File.WriteAllTextAsync(planned.Path, BuildContent(planned.Content));
-        return planned;
+        Enum.TryParse(_config?.Provider ?? "Gh", out Provider provider);//TODO: handle enum parsing safely
+
+        try
+        {
+            var response = await _codacyClient.AddRepositoryAsync(null,
+                new AddRepositoryBody
+                {
+                    Provider = provider,
+                    RepositoryFullPath = $"{planned.Owner}/{planned.Name}"
+                });
+
+            return planned with { Id = response.RepositoryId.ToString() ?? string.Empty };
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
-    public Task<CodacyRepository> ReadAsync(CodacyRepository resource)
+    public async Task<CodacyRepository> ReadAsync(CodacyRepository respository)
     {
-        return Task.FromResult(resource);
+        Enum.TryParse(_config?.Provider ?? "Gh", out Provider47 provider);//TODO: handle enum parsing safely
+        var response = await _codacyClient.GetRepositoryAsync(provider, respository.Owner, respository.Name);
+        return respository with { Id = response.Data.RepositoryId.ToString() ?? string.Empty };
     }
 
     public Task<CodacyRepository> UpdateAsync(CodacyRepository? prior, CodacyRepository planned)
@@ -41,9 +68,10 @@ public class CodacyResourceProvider :  IResourceProvider<CodacyRepository>
         return Task.FromResult(planned);
     }
 
-    public Task DeleteAsync(CodacyRepository resource)
+    public async Task DeleteAsync(CodacyRepository repository)
     {
-        return Task.CompletedTask;
+        Enum.TryParse(_config?.Provider ?? "Gh", out Provider48 provider);//TODO: handle enum parsing safely
+        await _codacyClient.DeleteRepositoryAsync(provider, repository.Owner, repository.Name);
     }
 
     public Task<IList<CodacyRepository>> ImportAsync(string id)
